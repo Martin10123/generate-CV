@@ -1,63 +1,91 @@
-import type { CvData } from './cvTypes'
+import type { CvData, CvLinks } from './cvTypes'
 
-/** Plantilla reina — estructura fija. Solo cambia el texto al adaptar. */
-export const QUEEN_CV: CvData = {
-  name: 'Martin Elias Simarra Salgado',
-  location: 'Cartagena, Colombia',
-  phone: '+57 301 862 8521',
-  email: 'martinsimarra4@gmail.com',
+/** CV de ejemplo (ficticio). La plantilla visual es fija; el contenido lo reemplaza el usuario. */
+export const EXAMPLE_CV: CvData = {
+  name: 'Ana Sofía Ruiz Mendoza',
+  location: 'Bogotá, Colombia',
+  phone: '+57 300 123 4567',
+  email: 'ana.ruiz.ejemplo@email.com',
   portfolioLabel: 'Portafolio web',
-  linkedinLabel: 'Linkedin/Martin',
+  linkedinLabel: 'Linkedin/AnaRuiz',
   links: {
-    phoneUrl: 'https://wa.me/3018628521',
-    emailUrl: 'mailto:martinsimarra4@gmail.com',
-    portfolioUrl: 'https://portafolio-web-sandy.vercel.app/',
-    linkedinUrl: 'https://www.linkedin.com/in/martinsimarrapro/',
+    phoneUrl: 'https://wa.me/573001234567',
+    emailUrl: 'mailto:ana.ruiz.ejemplo@email.com',
+    portfolioUrl: 'https://example.com/portfolio',
+    linkedinUrl: 'https://www.linkedin.com/in/ejemplo-ana-ruiz/',
   },
   summary:
-    '**Desarrollador Full Stack** con **3 años** de experiencia especializado en **C#/.NET** para la construcción de sistemas empresariales. Especializado en Desarrollo Full Stack con **C#/.NET**, y **React**, integración de **APIs REST** y arquitecturas basadas en **microservicios**. Experiencia desarrollando SPAs y **backend** escalables, aplicando **Clean Architecture**, principios **SOLID** y buenas prácticas modernas, trabajando con **bases de datos** relacionales y **NoSQL** e integrando procesos de **CI/CD**.',
+    '**Desarrolladora Full Stack** con **3 años** de experiencia en **React**, **TypeScript** y **Node.js**. Enfocada en productos web escalables, **APIs REST** y buenas prácticas de **Clean Architecture**. Experiencia con bases de datos relacionales, despliegues en la nube y trabajo colaborativo en equipos ágiles.',
   experience: [
     {
-      company: 'COTECMAR',
-      role: 'Desarrollador Full Stack',
-      location: 'Cartagena, Colombia',
-      dates: 'Mayo 2024 - Julio 2026',
+      company: 'NovaTech Labs',
+      role: 'Desarrolladora Full Stack',
+      location: 'Bogotá, Colombia',
+      dates: 'Marzo 2023 - Presente',
       bullets: [
-        '**Diseñé** y **desarrollé** sistemas internos empresariales utilizando **.NET** en **backend** y **React** en **frontend** para la gestión de procesos administrativos y operativos.',
-        '**Optimicé flujos** de trabajo internos mediante la automatización y centralización de procesos, logrando un incremento superior al **40%** en la eficiencia operativa de los equipos.',
-        '**Lideré** el desarrollo del **Portal de Empleado** y del **sistema de Gestión Administrativa**, utilizados por personal interno para la gestión de información laboral y procesos administrativos.',
-        '**Implementé** una arquitectura basada en **microservicios** utilizando **.NET, Nodejs y React**, facilitando la escalabilidad del sistema y la integración entre módulos independientes.',
+        '**Desarrollé** features de producto en **React** y **TypeScript**, mejorando la experiencia de usuarios internos y externos.',
+        '**Implementé** servicios **backend** en **Node.js** con **APIs REST**, integrando autenticación y control de acceso.',
+        '**Optimicé** consultas y flujos de datos, reduciendo tiempos de respuesta en módulos críticos del sistema.',
+        '**Colaboré** con diseño y producto en sprints ágiles, documentando componentes y criterios de aceptación.',
       ],
     },
     {
-      company: 'Saroa',
-      role: 'Desarrollador Full Stack',
-      location: 'Cartagena, Colombia',
-      dates: 'Octubre 2025 – Febrero 2026',
+      company: 'Orbit Soft',
+      role: 'Desarrolladora Frontend',
+      location: 'Remoto, Colombia',
+      dates: 'Enero 2022 - Febrero 2023',
       bullets: [
-        'Contratado como **Desarrollador Full Stack remoto** para apoyar la finalización de un proyecto crítico para una entidad del **Gobierno Colombiano** con fecha límite contractual, entregando módulos funcionales dentro del plazo establecido.',
-        '**Desarrollé** módulos **frontend** en **Vuejs** y **React** que permitieron completar funcionalidades clave del sistema y cumplir los hitos de entrega definidos en el proyecto.',
-        '**Implementé** y mantuve servicios **backend** en **.NET, Nodejs** dentro de una **arquitectura** de **microservicios**, desarrollando **endpoints REST** y gestionando la comunicación entre módulos del sistema.',
-        '**Apliqué** principios de **código limpio** y separación de responsabilidades para facilitar el mantenimiento del sistema y la incorporación de nuevos desarrolladores al proyecto.',
+        '**Construí** interfaces responsivas con **React** y **Vue.js** para dashboards operativos.',
+        '**Integré** consumos de **APIs** y estados de carga/error consistentes en la aplicación.',
+        '**Apliqué** control de versiones con **Git** y revisiones de código para mantener calidad del frontend.',
+        '**Aporté** mejoras de accesibilidad y performance en páginas de alto tráfico interno.',
       ],
     },
   ],
   education: [
     {
-      school: 'Tecnológico Comfenalco',
-      degree: 'Ingeniería de Sistemas - Tecnólogo en Desarrollo de Software',
-      location: 'Cartagena, Colombia',
-      date: 'Abril 2025',
+      school: 'Universidad Ejemplo',
+      degree: 'Ingeniería de Sistemas',
+      location: 'Bogotá, Colombia',
+      date: 'Diciembre 2022',
     },
   ],
   skills: [
-    { label: 'Frontend', value: 'React, Vuejs, TypeScript, Javascript' },
+    { label: 'Frontend', value: 'React, TypeScript, Vue.js, Javascript' },
     {
       label: 'Backend',
-      value: 'C#, .NET, Nodejs, MySQL, Microservicios, Clean Architecture, REST',
+      value: 'Node.js, APIs REST, PostgreSQL, Clean Architecture',
     },
-    { label: 'Herramientas', value: 'Git, Docker, Azure' },
+    { label: 'Herramientas', value: 'Git, Docker, AWS' },
   ],
+}
+
+/** @deprecated Usar EXAMPLE_CV — se mantiene el alias por compatibilidad interna. */
+export const QUEEN_CV = EXAMPLE_CV
+
+export function buildCvLinks(input: {
+  phone: string
+  email: string
+  portfolioUrl?: string
+  linkedinUrl?: string
+}): CvLinks {
+  const digits = input.phone.replace(/\D/g, '')
+  return {
+    phoneUrl: digits ? `https://wa.me/${digits}` : '#',
+    emailUrl: input.email.trim() ? `mailto:${input.email.trim()}` : '#',
+    portfolioUrl: input.portfolioUrl?.trim() || EXAMPLE_CV.links.portfolioUrl,
+    linkedinUrl: input.linkedinUrl?.trim() || EXAMPLE_CV.links.linkedinUrl,
+  }
+}
+
+export function cvFileName(cv: CvData): string {
+  const slug =
+    cv.name
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-zA-Z0-9]+/g, '_')
+      .replace(/^_|_$/g, '') || 'CV'
+  return `CV_${slug}.pdf`
 }
 
 export function cvDataToPlainText(cv: CvData): string {

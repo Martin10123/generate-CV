@@ -57,12 +57,14 @@
 }
 
 .cv-summary {
-  margin: 0 0 10pt;
+  display: block;
+  margin: 0 0 12pt;
   font-size: 12pt;
   font-weight: 400;
-  line-height: 1.44;
+  line-height: 17.3pt;
   text-align: justify;
-  hyphens: auto;
+  hyphens: none;
+  overflow: visible;
 }
 
 .cv-summary strong {
