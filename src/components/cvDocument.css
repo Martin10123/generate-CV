@@ -1,0 +1,165 @@
+/* Plantilla reina CV — medidas tomadas de CV_MARTIN_C#.pdf (Letter 612×792pt) */
+
+.cv-page {
+  box-sizing: border-box;
+  width: 612pt;
+  min-height: 792pt;
+  padding: 48pt 28pt 36pt;
+  margin: 0;
+  background: #ffffff;
+  color: #000000;
+  font-family: 'STIX Two Text', 'Times New Roman', Times, serif;
+  font-size: 11pt;
+  line-height: 1.25;
+  -webkit-font-smoothing: antialiased;
+}
+
+.cv-page *,
+.cv-page *::before,
+.cv-page *::after {
+  box-sizing: border-box;
+}
+
+.cv-header {
+  text-align: center;
+}
+
+.cv-name {
+  margin: 0;
+  font-size: 24pt;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0;
+}
+
+.cv-contact {
+  margin: 10pt 0 0;
+  font-size: 11pt;
+  font-weight: 400;
+  line-height: 1.1;
+}
+
+.cv-sep {
+  color: #000;
+}
+
+.cv-link {
+  color: rgb(17, 85, 204);
+  text-decoration: underline;
+  text-underline-offset: 2pt;
+}
+
+.cv-rule {
+  border: 0;
+  border-top: 1pt solid #000;
+  margin: 8pt 0 10pt;
+  width: 100%;
+}
+
+.cv-summary {
+  margin: 0 0 10pt;
+  font-size: 12pt;
+  font-weight: 400;
+  line-height: 1.44;
+  text-align: justify;
+  hyphens: auto;
+}
+
+.cv-summary strong {
+  font-weight: 700;
+}
+
+.cv-section {
+  margin: 0 0 8pt;
+}
+
+.cv-section-title {
+  margin: 0;
+  font-size: 12pt;
+  font-weight: 700;
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.2pt;
+}
+
+.cv-section > .cv-rule {
+  margin: 4pt 0 10pt;
+}
+
+.cv-job {
+  margin: 0 0 12pt;
+}
+
+.cv-edu {
+  margin: 0 0 8pt;
+}
+
+.cv-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12pt;
+  width: 100%;
+}
+
+.cv-company,
+.cv-meta-bold {
+  font-size: 11pt;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.cv-role {
+  font-size: 11pt;
+  font-weight: 400;
+  line-height: 1.25;
+}
+
+.cv-dates {
+  font-size: 11pt;
+  font-style: italic;
+  font-weight: 400;
+  line-height: 1.25;
+  white-space: nowrap;
+}
+
+.cv-meta-bold {
+  white-space: nowrap;
+}
+
+.cv-bullets,
+.cv-skills {
+  margin: 6pt 0 0;
+  padding: 0 0 0 18pt;
+  list-style: none;
+}
+
+.cv-bullets li,
+.cv-skills li {
+  position: relative;
+  margin: 0 0 6pt;
+  font-size: 11pt;
+  line-height: 1.28;
+  text-align: justify;
+}
+
+.cv-bullets li::before,
+.cv-skills li::before {
+  content: '●';
+  position: absolute;
+  left: -14pt;
+  top: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 10pt;
+  line-height: 1.28;
+}
+
+.cv-skills li {
+  margin-bottom: 5pt;
+  text-align: left;
+}
+
+.cv-bullets strong,
+.cv-skills strong {
+  font-weight: 700;
+}
