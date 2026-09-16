@@ -3,6 +3,7 @@ import { fileURLToPath } from 'node:url'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import { defineConfig, loadEnv, type Plugin } from 'vite'
+import { handleAdaptCvRequest } from './server/adaptCvCore.ts'
 
 const rootDir = path.dirname(fileURLToPath(import.meta.url))
 
@@ -11,104 +12,33 @@ function geminiProxy(): Plugin {
     name: 'gemini-proxy',
     configureServer(server) {
       server.middlewares.use('/api/adapt-cv', async (req, res) => {
-        if (req.method === 'OPTIONS') {
-          res.statusCode = 204
-          res.end()
-          return
-        }
-
-        if (req.method !== 'POST') {
-          res.statusCode = 405
-          res.setHeader('Content-Type', 'application/json')
-          res.end(JSON.stringify({ error: 'Método no permitido' }))
-          return
-        }
-
         try {
           const chunks: Buffer[] = []
-          for await (const chunk of req) {
-            chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk))
-          }
-          const body = JSON.parse(Buffer.concat(chunks).toString('utf8')) as {
-            prompt?: string
-            apiKey?: string
-            json?: boolean
+          if (req.method === 'POST') {
+            for await (const chunk of req) {
+              chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk))
+            }
           }
 
           const env = loadEnv(server.config.mode, rootDir, '')
-          const apiKey = body.apiKey?.trim() || env.GEMINI_API_KEY?.trim()
-
-          if (!apiKey) {
-            res.statusCode = 400
-            res.setHeader('Content-Type', 'application/json')
-            res.end(
-              JSON.stringify({
-                error:
-                  'Falta la API key. Pégala en la app o define GEMINI_API_KEY en .env',
-              }),
-            )
-            return
-          }
-
-          if (!body.prompt?.trim()) {
-            res.statusCode = 400
-            res.setHeader('Content-Type', 'application/json')
-            res.end(JSON.stringify({ error: 'El prompt está vacío' }))
-            return
-          }
-
-          const model = env.GEMINI_MODEL || 'gemini-3.6-flash'
-          const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`
-
-          const geminiRes = await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              contents: [{ role: 'user', parts: [{ text: body.prompt }] }],
-              generationConfig: {
-                temperature: 0.35,
-                maxOutputTokens: 8192,
-                ...(body.json
-                  ? { responseMimeType: 'application/json' as const }
-                  : {}),
-              },
-            }),
+          const request = new Request('http://localhost/api/adapt-cv', {
+            method: req.method,
+            headers: {
+              'content-type': req.headers['content-type'] ?? 'application/json',
+            },
+            body: chunks.length > 0 ? Buffer.concat(chunks) : undefined,
           })
 
-          const data = (await geminiRes.json()) as {
-            error?: { message?: string }
-            candidates?: Array<{
-              content?: { parts?: Array<{ text?: string }> }
-            }>
-          }
+          const response = await handleAdaptCvRequest(request, {
+            GEMINI_API_KEY: env.GEMINI_API_KEY,
+            GEMINI_MODEL: env.GEMINI_MODEL,
+          })
 
-          if (!geminiRes.ok) {
-            res.statusCode = geminiRes.status
-            res.setHeader('Content-Type', 'application/json')
-            res.end(
-              JSON.stringify({
-                error: data.error?.message || 'Error al llamar a Gemini',
-              }),
-            )
-            return
-          }
-
-          const text =
-            data.candidates?.[0]?.content?.parts
-              ?.map((part) => part.text ?? '')
-              .join('')
-              .trim() ?? ''
-
-          if (!text) {
-            res.statusCode = 502
-            res.setHeader('Content-Type', 'application/json')
-            res.end(JSON.stringify({ error: 'Gemini no devolvió texto' }))
-            return
-          }
-
-          res.statusCode = 200
-          res.setHeader('Content-Type', 'application/json')
-          res.end(JSON.stringify({ text }))
+          res.statusCode = response.status
+          response.headers.forEach((value, key) => {
+            res.setHeader(key, value)
+          })
+          res.end(Buffer.from(await response.arrayBuffer()))
         } catch (error) {
           res.statusCode = 500
           res.setHeader('Content-Type', 'application/json')

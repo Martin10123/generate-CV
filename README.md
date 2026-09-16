@@ -20,5 +20,5 @@ La descarga usa la **plantilla reina** (`CV_MARTIN_C#.pdf`): misma estructura, t
 
 ## Notas
 
-- El proxy `/api/adapt-cv` solo corre con `pnpm dev` (la key no se expone en el bundle).
+- El proxy `/api/adapt-cv` corre en local con `pnpm dev` y en Vercel como función serverless (la key no se expone en el bundle).
 - Modelo por defecto: `gemini-3.6-flash` (configurable con `GEMINI_MODEL`).

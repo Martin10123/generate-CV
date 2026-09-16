@@ -42,7 +42,17 @@ async function requestCvJson(input: {
     }),
   })
 
-  const data = (await response.json()) as { text?: string; error?: string }
+  const raw = await response.text()
+  let data: { text?: string; error?: string }
+  try {
+    data = JSON.parse(raw) as { text?: string; error?: string }
+  } catch {
+    throw new Error(
+      response.status === 404
+        ? 'El proxy /api/adapt-cv no está disponible en este entorno'
+        : raw.slice(0, 180) || `Error ${response.status}`,
+    )
+  }
 
   if (!response.ok) {
     throw new Error(data.error || `Error ${response.status}`)
