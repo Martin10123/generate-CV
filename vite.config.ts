@@ -21,10 +21,15 @@ function geminiProxy(): Plugin {
           }
 
           const env = loadEnv(server.config.mode, rootDir, '')
+          const forwarded = req.headers['x-forwarded-for']
           const request = new Request('http://localhost/api/adapt-cv', {
             method: req.method,
             headers: {
               'content-type': req.headers['content-type'] ?? 'application/json',
+              'x-forwarded-for':
+                (Array.isArray(forwarded) ? forwarded[0] : forwarded) ??
+                req.socket.remoteAddress ??
+                '127.0.0.1',
             },
             body: chunks.length > 0 ? Buffer.concat(chunks) : undefined,
           })

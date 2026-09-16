@@ -1,4 +1,4 @@
-import { useRef, useState, type ChangeEvent, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from 'react'
 import {
   Check,
   Copy,
@@ -26,6 +26,8 @@ import type { CvData } from './lib/cvTypes'
 import { downloadCvPdf } from './lib/downloadCvPdf'
 import { readCvUpload } from './lib/readCvUpload'
 
+const GEMINI_COOLDOWN_MS = 8_000
+
 function App() {
   const [apiKey, setApiKey] = useState(() => loadStoredApiKey())
   const [jobOffer, setJobOffer] = useState('')
@@ -40,8 +42,22 @@ function App() {
   const [downloading, setDownloading] = useState(false)
   const [copied, setCopied] = useState(false)
   const [showKey, setShowKey] = useState(!loadStoredApiKey())
+  const [cooling, setCooling] = useState(false)
   const cvRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const cooldownTimer = useRef(0)
+
+  function armCooldown() {
+    window.clearTimeout(cooldownTimer.current)
+    setCooling(true)
+    cooldownTimer.current = window.setTimeout(() => {
+      setCooling(false)
+    }, GEMINI_COOLDOWN_MS)
+  }
+
+  useEffect(() => {
+    return () => window.clearTimeout(cooldownTimer.current)
+  }, [])
 
   function resetToExample() {
     setCvData(EXAMPLE_CV)
@@ -77,6 +93,7 @@ function App() {
     } catch (err) {
       setError(err instanceof Error ? err.message : 'No se pudo adaptar el CV')
     } finally {
+      armCooldown()
       setLoading(false)
     }
   }
@@ -103,6 +120,7 @@ function App() {
         err instanceof Error ? err.message : 'No se pudo cargar el CV',
       )
     } finally {
+      armCooldown()
       setIngesting(false)
     }
   }
@@ -161,7 +179,7 @@ function App() {
     }
   }
 
-  const busy = loading || ingesting || uploading || downloading
+  const busy = loading || ingesting || uploading || downloading || cooling
   const canAdapt = cvReady && !busy
 
   return (
@@ -317,7 +335,9 @@ function App() {
                   {ingesting ? 'Cargando…' : 'Cargar en plantilla'}
                 </Button>
                 <p className="text-xs text-stone-500">
-                  Paso obligatorio antes de adaptar.
+                  {cooling
+                    ? 'Espera unos segundos para no saturar Gemini.'
+                    : 'Paso obligatorio antes de adaptar.'}
                 </p>
               </div>
             </div>
@@ -387,6 +407,11 @@ function App() {
               )}
               {copied ? 'Copiado' : 'Copiar texto'}
             </Button>
+            {cooling && !error ? (
+              <p className="text-sm text-stone-500">
+                Espera unos segundos para no saturar Gemini.
+              </p>
+            ) : null}
             {error ? (
               <p className="text-sm text-red-700" role="alert">
                 {error}
