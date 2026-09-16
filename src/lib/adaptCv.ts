@@ -43,6 +43,12 @@ async function requestCvJson(input: {
   })
 
   const raw = await response.text()
+  if (response.status === 429) {
+    throw new Error(
+      'Demasiadas solicitudes desde tu IP. Espera unos minutos para no saturar Gemini.',
+    )
+  }
+
   let data: { text?: string; error?: string }
   try {
     data = JSON.parse(raw) as { text?: string; error?: string }
