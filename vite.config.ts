@@ -3,7 +3,7 @@ import { fileURLToPath } from 'node:url'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import { defineConfig, loadEnv, type Plugin } from 'vite'
-import { handleAdaptCvRequest } from './server/adaptCvCore.ts'
+import { handleAdaptCvRequest } from './api/adapt-cv.ts'
 
 const rootDir = path.dirname(fileURLToPath(import.meta.url))
 
