@@ -2,6 +2,7 @@ import {
   buildCvAdaptPrompt,
   buildCvIngestPrompt,
   parseCvJson,
+  preserveAdaptedProfile,
 } from './prompt'
 import type { CvData } from './cvTypes'
 
@@ -92,9 +93,10 @@ export async function adaptCv(input: {
   currentCv: string
   apiKey: string
 }): Promise<CvData> {
-  return requestCvJson({
+  const adapted = await requestCvJson({
     prompt: buildCvAdaptPrompt(input.jobOffer, input.currentCv),
     apiKey: input.apiKey,
     emptyError: 'No se recibió texto adaptado',
   })
+  return preserveAdaptedProfile(input.currentCv, adapted)
 }

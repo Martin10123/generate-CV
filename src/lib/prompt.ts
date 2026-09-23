@@ -55,11 +55,11 @@ REGLAS:
 1. Conserva name, location, phone, email, portfolioLabel, linkedinLabel, companies, education school/degree/dates y cantidad de bullets EXACTOS salvo que el CV actual ya los tenga distintos (entonces usa los del CV actual).
 2. Mantén la misma cantidad de experiencias y de bullets por experiencia que el CV actual.
 3. En summary, bullets y skills.value usa **palabra** para negritas de keywords técnicas (como en un CV ATS), sin abusar. Deja SIEMPRE un espacio antes y después de cada **negrita**.
-4. Longitud de summary y bullets equivalente a la original (no alargues).
-5. Extrae de la oferta keywords MUST y PLUS (ej. AWS Serverless, APIs & integrations, AI/LLMs, TypeScript, Node.js, React). Integra las MUST en summary, bullets y Skills. Las PLUS deben aparecer al menos en Skills (Herramientas u otra fila) y, si cabe sin alargar, una mención breve en summary.
-6. No inventes empresas, cargos, fechas ni logros falsos. Sí puedes alinear el lenguaje a la oferta y listar tecnologías PLUS de la vacante en Skills aunque no sean el foco histórico del CV.
+4. El SUMMARY es la identidad profesional: NO lo reescribas desde cero ni lo reduzcas a 1-2 frases genéricas de la vacante. Conserva la misma densidad y casi la misma longitud. OBLIGATORIO mantener del original, si aparecen: años de experiencia, stack principal (p.ej. C#/.NET, React), Clean Architecture, SOLID, microservicios, APIs REST, SPAs, bases de datos relacionales/NoSQL y CI/CD. Solo AJUSTA el wording y AÑADE keywords de la oferta; nunca sustituyas el perfil.
+5. Extrae de la oferta keywords MUST y PLUS. Añádelas a summary, bullets y Skills SIN borrar lo que ya está. Las PLUS van al menos en Skills.
+6. No inventes empresas, cargos, fechas ni logros falsos. Sí puedes alinear el lenguaje a la oferta y listar tecnologías PLUS en Skills.
 7. Tono natural, profesional, sin clichés de IA.
-8. Prioriza cobertura ATS de la oferta: si la vacante nombra AWS, Serverless, APIs, integrations, AI o LLMs, esos términos (o equivalentes claros) DEBEN aparecer en el JSON final.
+8. Cobertura ATS = añadir términos de la vacante al perfil existente, no reemplazar el perfil por un resumen de la oferta.
 9. Si el CV trae URLs de portafolio o LinkedIn, ponlas en portfolioUrl y linkedinUrl; si no, usa "#".`
 }
 
@@ -122,6 +122,61 @@ REGLAS:
 type CvJsonExtra = Partial<CvData> & {
   portfolioUrl?: string
   linkedinUrl?: string
+}
+
+const IDENTITY_PHRASES = [
+  /c#\s*\/\s*\.?net|c#|\.net/i,
+  /clean architecture/i,
+  /principios?\s+solid|\bSOLID\b/i,
+  /ci\s*\/\s*cd/i,
+  /microservicios?/i,
+  /apis?\s+rest/i,
+  /\bspas?\b/i,
+  /bases de datos(?:\s+relacionales)?/i,
+  /\bnosql\b/i,
+]
+
+function extractPlainSummary(plain: string): string {
+  const split = plain.search(/\nEXPERIENCIA PROFESIONAL\n/i)
+  const head = (split === -1 ? plain : plain.slice(0, split)).trim().split('\n')
+  return head.slice(2).join(' ').replace(/\s+/g, ' ').trim()
+}
+
+function hasPhrase(text: string, pattern: RegExp): boolean {
+  return pattern.test(text)
+}
+
+/** Restaura años y pilares del perfil si Gemini los recortó al adaptar. */
+export function preserveAdaptedProfile(
+  originalPlain: string,
+  cv: CvData,
+): CvData {
+  const original = extractPlainSummary(originalPlain)
+  if (!original) return cv
+
+  let summary = cv.summary
+  const years = original.match(/(\d+)\s*años(?:\s+de experiencia)?/i)
+  if (years && !new RegExp(`\\b${years[1]}\\s*años`, 'i').test(summary)) {
+    summary = summary.replace(
+      /(desarrollador(?:a)?(?:\s+full\s+stack)?)/i,
+      `$1 con ${years[1]} años de experiencia`,
+    )
+    if (!new RegExp(`\\b${years[1]}\\s*años`, 'i').test(summary)) {
+      summary = `Profesional con ${years[1]} años de experiencia. ${summary}`
+    }
+  }
+
+  const missing = IDENTITY_PHRASES.filter(
+    (pattern) => hasPhrase(original, pattern) && !hasPhrase(summary, pattern),
+  ).map((pattern) => original.match(pattern)?.[0])
+    .filter((phrase): phrase is string => Boolean(phrase))
+
+  if (missing.length > 0) {
+    const tail = missing.join(', ')
+    summary = `${summary.replace(/\s+$/, '')} Experiencia con ${tail}.`
+  }
+
+  return summary === cv.summary ? cv : { ...cv, summary }
 }
 
 export function parseCvJson(raw: string): CvData {
