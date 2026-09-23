@@ -55,7 +55,7 @@ REGLAS:
 1. Conserva name, location, phone, email, portfolioLabel, linkedinLabel, companies, education school/degree/dates y cantidad de bullets EXACTOS salvo que el CV actual ya los tenga distintos (entonces usa los del CV actual).
 2. Mantén la misma cantidad de experiencias y de bullets por experiencia que el CV actual.
 3. En summary, bullets y skills.value usa **palabra** para negritas de keywords técnicas (como en un CV ATS), sin abusar. Deja SIEMPRE un espacio antes y después de cada **negrita**.
-4. El SUMMARY es la identidad profesional: NO lo reescribas desde cero ni lo reduzcas a 1-2 frases genéricas de la vacante. Conserva la misma densidad y casi la misma longitud. OBLIGATORIO mantener del original, si aparecen: años de experiencia, stack principal (p.ej. C#/.NET, React), Clean Architecture, SOLID, microservicios, APIs REST, SPAs, bases de datos relacionales/NoSQL y CI/CD. Solo AJUSTA el wording y AÑADE keywords de la oferta; nunca sustituyas el perfil.
+4. El SUMMARY conserva la misma densidad y casi la misma longitud: NO lo reduzcas a 1-2 frases. El stack (C#/.NET, Angular, React, Node, etc.) SÍ se puede cambiar por el que pida la vacante. OBLIGATORIO mantener del original, si aparecen: años de experiencia, Clean Architecture, SOLID, microservicios, APIs REST, SPAs, bases de datos relacionales/NoSQL y CI/CD. Esos pilares no se quitan.
 5. Extrae de la oferta keywords MUST y PLUS. Añádelas a summary, bullets y Skills SIN borrar lo que ya está. Las PLUS van al menos en Skills.
 6. No inventes empresas, cargos, fechas ni logros falsos. Sí puedes alinear el lenguaje a la oferta y listar tecnologías PLUS en Skills.
 7. Tono natural, profesional, sin clichés de IA.
@@ -125,7 +125,6 @@ type CvJsonExtra = Partial<CvData> & {
 }
 
 const IDENTITY_PHRASES = [
-  /c#\s*\/\s*\.?net|c#|\.net/i,
   /clean architecture/i,
   /principios?\s+solid|\bSOLID\b/i,
   /ci\s*\/\s*cd/i,
