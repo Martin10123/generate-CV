@@ -80,6 +80,26 @@ function rateLimitMessage(retryAfterSec: number): string {
     : `Demasiadas solicitudes. Espera ${retryAfterSec} s para no saturar Gemini.`
 }
 
+const DEFAULT_FALLBACKS = ['gemini-3.5-flash', 'gemini-3.5-flash-lite']
+
+function modelChain(primary: string): string[] {
+  return [primary, ...DEFAULT_FALLBACKS.filter((model) => model !== primary)]
+}
+
+function isCapacityError(
+  httpStatus: number,
+  errorStatus?: string,
+  message?: string,
+): boolean {
+  if (httpStatus === 503 || httpStatus === 429 || httpStatus === 404) return true
+  if (errorStatus === 'UNAVAILABLE' || errorStatus === 'RESOURCE_EXHAUSTED') {
+    return true
+  }
+  return /high demand|try again later|overloaded|capacity|no longer available/i.test(
+    message ?? '',
+  )
+}
+
 async function runAdaptCv(
   body: AdaptCvBody,
   env: GeminiEnv,
@@ -109,49 +129,70 @@ async function runAdaptCv(
     }
   }
 
-  const model = env.GEMINI_MODEL || 'gemini-3.6-flash'
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`
+  const models = modelChain(env.GEMINI_MODEL || 'gemini-3.6-flash')
+  let lastStatus = 502
+  let lastError = 'Error al llamar a Gemini'
+  const attempted: string[] = []
 
-  const geminiRes = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      contents: [{ role: 'user', parts: [{ text: body.prompt }] }],
-      generationConfig: {
-        temperature: 0.35,
-        maxOutputTokens: 8192,
-        ...(body.json
-          ? { responseMimeType: 'application/json' as const }
-          : {}),
-      },
-    }),
-  })
+  for (let i = 0; i < models.length; i++) {
+    const currentModel = models[i]
+    if (!currentModel) break
+    attempted.push(currentModel)
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${currentModel}:generateContent?key=${encodeURIComponent(apiKey)}`
 
-  const data = (await geminiRes.json()) as {
-    error?: { message?: string }
-    candidates?: Array<{
-      content?: { parts?: Array<{ text?: string }> }
-    }>
-  }
+    const geminiRes = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ role: 'user', parts: [{ text: body.prompt }] }],
+        generationConfig: {
+          temperature: 0.35,
+          maxOutputTokens: 8192,
+          ...(body.json
+            ? { responseMimeType: 'application/json' as const }
+            : {}),
+        },
+      }),
+    })
 
-  if (!geminiRes.ok) {
-    return {
-      status: geminiRes.status,
-      payload: { error: data.error?.message || 'Error al llamar a Gemini' },
+    const data = (await geminiRes.json()) as {
+      error?: { message?: string; code?: number; status?: string }
+      candidates?: Array<{
+        content?: { parts?: Array<{ text?: string }> }
+      }>
+    }
+    const geminiError = data.error?.message || ''
+    const text =
+      data.candidates?.[0]?.content?.parts
+        ?.map((part) => part.text ?? '')
+        .join('')
+        .trim() ?? ''
+
+    if (geminiRes.ok && text) {
+      return { status: 200, payload: { text } }
+    }
+
+    lastStatus = geminiRes.ok ? 502 : geminiRes.status
+    lastError =
+      geminiError ||
+      (geminiRes.ok ? 'Gemini no devolvió texto' : 'Error al llamar a Gemini')
+    const canFallback =
+      i < models.length - 1 &&
+      isCapacityError(geminiRes.status, data.error?.status, geminiError)
+    if (!canFallback) {
+      break
     }
   }
 
-  const text =
-    data.candidates?.[0]?.content?.parts
-      ?.map((part) => part.text ?? '')
-      .join('')
-      .trim() ?? ''
-
-  if (!text) {
-    return { status: 502, payload: { error: 'Gemini no devolvió texto' } }
+  return {
+    status: lastStatus,
+    payload: {
+      error:
+        lastStatus === 503 || /high demand|unavailable/i.test(lastError)
+          ? `Gemini saturado. Se intentó: ${attempted.join(', ')}. Prueba de nuevo en un momento.`
+          : lastError,
+    },
   }
-
-  return { status: 200, payload: { text } }
 }
 
 function applyRateLimits(
