@@ -54,7 +54,7 @@ Devuelve SOLO un JSON válido (sin markdown ni explicación) con esta forma exac
 REGLAS:
 1. Conserva name, location, phone, email, portfolioLabel, linkedinLabel, companies, education school/degree/dates y cantidad de bullets EXACTOS salvo que el CV actual ya los tenga distintos (entonces usa los del CV actual).
 2. Mantén la misma cantidad de experiencias y de bullets por experiencia que el CV actual.
-3. En summary y bullets usa **palabra** para negritas de keywords técnicas (como en un CV ATS), sin abusar. Deja SIEMPRE un espacio antes y después de cada **negrita**.
+3. En summary, bullets y skills.value usa **palabra** para negritas de keywords técnicas (como en un CV ATS), sin abusar. Deja SIEMPRE un espacio antes y después de cada **negrita**.
 4. Longitud de summary y bullets equivalente a la original (no alargues).
 5. Extrae de la oferta keywords MUST y PLUS (ej. AWS Serverless, APIs & integrations, AI/LLMs, TypeScript, Node.js, React). Integra las MUST en summary, bullets y Skills. Las PLUS deben aparecer al menos en Skills (Herramientas u otra fila) y, si cabe sin alargar, una mención breve en summary.
 6. No inventes empresas, cargos, fechas ni logros falsos. Sí puedes alinear el lenguaje a la oferta y listar tecnologías PLUS de la vacante en Skills aunque no sean el foco histórico del CV.
@@ -113,7 +113,7 @@ Devuelve SOLO un JSON válido (sin markdown ni explicación) con esta forma exac
 REGLAS:
 1. Usa SOLO información presente en el CV del usuario.
 2. Incluye entre 1 y 3 experiencias (las más recientes/relevantes). Cada una con 3 a 5 bullets.
-3. En summary y bullets usa **palabra** para negritas de keywords técnicas. Deja SIEMPRE un espacio antes y después de cada **negrita**.
+3. En summary, bullets y skills.value usa **palabra** para negritas de keywords técnicas. Deja SIEMPRE un espacio antes y después de cada **negrita**.
 4. portfolioLabel suele ser "Portafolio web" si hay portafolio; linkedinLabel algo como "Linkedin/Nombre".
 5. Extrae portfolioUrl y linkedinUrl si aparecen; si no, "#".
 6. Skills: exactamente 3 filas con labels Frontend, Backend y Herramientas (agrupa tecnologías del CV ahí).`

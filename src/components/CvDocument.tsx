@@ -84,7 +84,7 @@ export function CvDocument({ cv }: Props) {
           {cv.skills.map((skill) => (
             <li key={skill.label}>
               <strong>{skill.label}: </strong>
-              <span>{skill.value}</span>
+              <span>{renderRichText(skill.value)}</span>
             </li>
           ))}
         </ul>
